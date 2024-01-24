@@ -69,7 +69,7 @@ func (ls *LetStatement) String() string {
 	out.WriteString(ls.Name.String())
 	out.WriteString(" = ")
 
-	if ls.Value != nil { 
+	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
 	}
 
@@ -79,7 +79,7 @@ func (ls *LetStatement) String() string {
 }
 
 type ReturnStatement struct {
-	Token token.Token
+	Token       token.Token
 	ReturnValue Expression
 }
 
@@ -115,3 +115,12 @@ func (es *ExpressionStatement) String() string {
 
 	return ""
 }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+
+func (il *IntegerLiteral) expressionNode()      {}
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
+func (il *IntegerLiteral) String() string       { return il.Token.Literal }
