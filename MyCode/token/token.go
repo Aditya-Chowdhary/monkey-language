@@ -14,6 +14,7 @@ const (
 	// Identifiers + literals
 	IDENT = "IDENT" // add, foobar, x, y...
 	INT = "INT" // 123_345
+	STRING = "STRING"
 
 	// Operators
 	ASSIGN = "="
