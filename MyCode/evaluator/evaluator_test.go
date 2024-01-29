@@ -381,6 +381,7 @@ func TestBuiltinFunctions(t *testing.T) {
 		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
 		{`len([1, 2, 3])`, 3},
 		{`len([])`, 0},
+		{`puts("hello", "world!")`, nil},
 		{`first([1, 2, 3])`, 1},
 		{`first([])`, nil},
 		{`first(1)`, "argument to `first` must be ARRAY, got INTEGER"},
@@ -399,6 +400,8 @@ func TestBuiltinFunctions(t *testing.T) {
 		switch expected := tt.expected.(type) {
 		case int:
 			testIntegerObject(t, evaluated, int64(expected))
+		case nil:
+			testNullObject(t, evaluated)
 		case string:
 			errObj, ok := evaluated.(*object.Error)
 			if !ok {
@@ -407,6 +410,19 @@ func TestBuiltinFunctions(t *testing.T) {
 			}
 			if errObj.Message != expected {
 				t.Errorf("wrong error message. expected=%q, got=%q", expected, errObj.Message)
+			}
+		case []int:
+			array, ok := evaluated.(*object.Array)
+			if !ok {
+				t.Errorf("obj not Array. got=%T (%+v)", evaluated, evaluated)
+				continue
+			}
+			if len(array.Elements) != len(expected) {
+				t.Errorf("wrong num of elements. want=%d, got=%d", len(expected), len(array.Elements))
+				continue
+			}
+			for i, expectedElem := range expected {
+				testIntegerObject(t, array.Elements[i], int64(expectedElem))
 			}
 		}
 	}
@@ -515,7 +531,7 @@ func TestHashLiterals(t *testing.T) {
 	}
 
 	if len(result.Pairs) != len(expected) {
-		t.Errorf("Hash has wrong number of pairs. got=%d", len(result.Pairs))
+		t.Fatalf("Hash has wrong number of pairs. got=%d", len(result.Pairs))
 	}
 
 	for expectedKey, expectedValue := range expected {

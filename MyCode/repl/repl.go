@@ -11,7 +11,7 @@ import (
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/parser"
 )
 
-const PROMPT = ">>"
+const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)

@@ -152,15 +152,15 @@ type InfixExpression struct {
 	Right    Expression
 }
 
-func (oe *InfixExpression) expressionNode()      {}
-func (oe *InfixExpression) TokenLiteral() string { return oe.Token.Literal }
-func (oe *InfixExpression) String() string {
+func (ie *InfixExpression) expressionNode()      {}
+func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *InfixExpression) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("(")
-	out.WriteString(oe.Left.String())
-	out.WriteString(" " + oe.Operator + " ")
-	out.WriteString(oe.Right.String())
+	out.WriteString(ie.Left.String())
+	out.WriteString(" " + ie.Operator + " ")
+	out.WriteString(ie.Right.String())
 	out.WriteString(")")
 
 	return out.String()
@@ -193,7 +193,7 @@ func (ie *IfExpression) String() string {
 	out.WriteString(ie.Consequence.String())
 
 	if ie.Alternative != nil {
-		out.WriteString("else")
+		out.WriteString("else ")
 		out.WriteString(ie.Alternative.String())
 	}
 
