@@ -35,6 +35,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
+		c.emit(code.OpPop)
 
 	case *ast.InfixExpression:
 		err := c.Compile(node.Left)
@@ -53,7 +54,6 @@ func (c *Compiler) Compile(node ast.Node) error {
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
-
 
 	case *ast.IntegerLiteral:
 		integer := &object.Integer{Value: node.Value}
@@ -91,6 +91,3 @@ func (c *Compiler) Bytecode() *Bytecode {
 		Constants:    c.constants,
 	}
 }
-
-	
-

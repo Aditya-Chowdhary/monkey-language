@@ -21,7 +21,7 @@ func (ins Instructions) String() string {
 
 		operands, read := ReadOperands(def, ins[i+1:])
 		fmt.Fprintf(&out, "%04d %s\n", i, ins.fmtInstruction(def, operands))
-		
+
 		i += 1 + read
 	}
 
@@ -29,7 +29,7 @@ func (ins Instructions) String() string {
 }
 
 func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
-	operandCount := len(def.OperandWidths) 
+	operandCount := len(def.OperandWidths)
 
 	if len(operands) != operandCount {
 		return fmt.Sprintf("ERROR: operand len %d does not match defined %d\n", len(operands), operandCount)
@@ -43,13 +43,14 @@ func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 	}
 
 	return fmt.Sprintf("ERROR: unhandled operandCount for %s\n", def.Name)
-} 
+}
 
 type Opcode byte
 
 const (
 	OpConstant Opcode = iota
 	OpAdd
+	OpPop
 )
 
 type Definition struct {
@@ -59,7 +60,8 @@ type Definition struct {
 
 var definitions = map[Opcode]*Definition{
 	OpConstant: {"OpConstant", []int{2}},
-	OpAdd: {"OpAdd", []int{}},
+	OpAdd:      {"OpAdd", []int{}},
+	OpPop:      {"OpPop", []int{}},
 }
 
 func Lookup(op byte) (*Definition, error) {
