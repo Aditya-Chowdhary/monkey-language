@@ -12,6 +12,7 @@ const StackSize = 2048
 
 var True = &object.Boolean{Value: true}
 var False = &object.Boolean{Value: false}
+var Null = &object.Null{}
 
 type VM struct {
 	constants    []object.Object
@@ -59,13 +60,13 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
-			
+
 		case code.OpBang:
 			err := vm.executeBangOperator()
 			if err != nil {
 				return err
 			}
-			
+
 		case code.OpMinus:
 			err := vm.executeMinusOperator()
 			if err != nil {
@@ -83,6 +84,25 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
+		case code.OpNull:
+			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
+
+		case code.OpJumpNotTruthy:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			condition := vm.pop()
+			if !isTruthy(condition) {
+				ip = pos - 1
+			}
+
+		case code.OpJump:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip = pos - 1
 
 		case code.OpPop:
 			vm.pop()
@@ -125,17 +145,17 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 func (vm *VM) executeBinaryIntegerOperation(op code.Opcode, left, right object.Object) error {
 	leftValue := left.(*object.Integer).Value
 	rightValue := right.(*object.Integer).Value
-	
+
 	var result int64
 
 	switch op {
-	case code.OpAdd: 
+	case code.OpAdd:
 		result = leftValue + rightValue
-	case code.OpSub: 
+	case code.OpSub:
 		result = leftValue - rightValue
-	case code.OpMul: 
+	case code.OpMul:
 		result = leftValue * rightValue
-	case code.OpDiv: 
+	case code.OpDiv:
 		result = leftValue / rightValue
 	default:
 		return fmt.Errorf("unknown integer operator: %d", op)
@@ -153,9 +173,9 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 	}
 	switch op {
 	case code.OpEqual:
-		return vm.push(nativeBoolToBooleanObject(right==left))
+		return vm.push(nativeBoolToBooleanObject(right == left))
 	case code.OpNotEqual:
-		return vm.push(nativeBoolToBooleanObject(right!=left))
+		return vm.push(nativeBoolToBooleanObject(right != left))
 	default:
 		return fmt.Errorf("unknown operator: %d (%s %s)", op, left.Type(), right.Type())
 	}
@@ -192,10 +212,12 @@ func (vm *VM) executeBangOperator() error {
 		return vm.push(False)
 	case False:
 		return vm.push(True)
+	case Null:
+		return vm.push(True)
 	default:
 		return vm.push(False)
 	}
-} 
+}
 
 func (vm *VM) executeMinusOperator() error {
 	operand := vm.pop()
@@ -206,4 +228,15 @@ func (vm *VM) executeMinusOperator() error {
 
 	value := operand.(*object.Integer).Value
 	return vm.push(&object.Integer{Value: -value})
+}
+
+func isTruthy(obj object.Object) bool {
+	switch obj := obj.(type) {
+	case *object.Boolean:
+		return obj.Value
+	case *object.Null:
+		return false
+	default:
+		return true
+	}
 }
