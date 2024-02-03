@@ -136,9 +136,27 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.removeLastPop()
 		}
 
-		afterConsequencePos := len(c.instructions)
-		c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+		if node.Alternative == nil {
+			afterConsequencePos := len(c.instructions)
+			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+		} else {
+			jumpPos := c.emit(code.OpJump, 9999)
 
+			afterConsequencePos := len(c.instructions)
+			c.changeOperand(jumpNotTruthyPos, afterConsequencePos)
+
+			err = c.Compile(node.Alternative)
+			if err != nil {
+				return err
+			}
+
+			if c.lastInstructionIsPop() {
+				c.removeLastPop()
+			}
+
+			afterAlternativePos := len(c.instructions)
+			c.changeOperand(jumpPos, afterAlternativePos)
+		}
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
@@ -172,7 +190,7 @@ func (c *Compiler) emit(op code.Opcode, operands ...int) int {
 	return pos
 }
 
-func (c *Compiler) setLastInstruction(op code.Opcode, pos int)  {
+func (c *Compiler) setLastInstruction(op code.Opcode, pos int) {
 	previous := c.lastInstruction
 	last := EmittedInstruction{Opcode: op, Position: pos}
 
@@ -181,7 +199,7 @@ func (c *Compiler) setLastInstruction(op code.Opcode, pos int)  {
 }
 
 func (c *Compiler) lastInstructionIsPop() bool {
-	return  c.lastInstruction.Opcode == code.OpPop
+	return c.lastInstruction.Opcode == code.OpPop
 }
 
 func (c *Compiler) removeLastPop() {
@@ -190,7 +208,7 @@ func (c *Compiler) removeLastPop() {
 }
 
 func (c *Compiler) replaceInstruction(pos int, newInstruction []byte) {
-	for i:=0; i < len(newInstruction); i++ {
+	for i := 0; i < len(newInstruction); i++ {
 		c.instructions[pos+i] = newInstruction[i]
 	}
 }
