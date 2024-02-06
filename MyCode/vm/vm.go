@@ -75,6 +75,18 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpArray:
+			numElements := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			array := vm.buildArray(vm.sp-numElements, vm.sp)
+			vm.sp = vm.sp - numElements
+
+			err := vm.push(array)
+			if err != nil {
+				return err
+			}
+
 		case code.OpAdd, code.OpSub, code.OpMul, code.OpDiv:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
@@ -154,6 +166,16 @@ func (vm *VM) pop() object.Object {
 	return o
 }
 
+func (vm *VM) buildArray(startIndex, endIndex int) object.Object {
+	elements := make([]object.Object, endIndex-startIndex)
+
+	for i := startIndex; i < endIndex; i++ {
+		elements[i-startIndex] = vm.stack[i]
+	}
+
+	return &object.Array{Elements: elements}
+}
+
 func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	right := vm.pop()
 	left := vm.pop()
@@ -200,7 +222,7 @@ func (vm *VM) executeBinaryStringOperation(op code.Opcode, left, right object.Ob
 	leftValue := left.(*object.String).Value
 	rightValue := right.(*object.String).Value
 
-	return vm.push(&object.String{Value: leftValue+rightValue})
+	return vm.push(&object.String{Value: leftValue + rightValue})
 }
 
 func (vm *VM) executeComparison(op code.Opcode) error {
