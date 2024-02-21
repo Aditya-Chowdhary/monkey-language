@@ -37,12 +37,20 @@ type Hashable interface {
 	HashKey() HashKey
 }
 
+type HashKey struct {
+	Type  ObjectType
+	Value uint64
+}
+
 type Integer struct {
 	Value int64
 }
 
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }
 func (i *Integer) Inspect() string  { return fmt.Sprintf("%d", i.Value) }
+func (b *Integer) HashKey() HashKey {
+	return HashKey{Type: b.Type(), Value: uint64(b.Value)}
+}
 
 type Boolean struct {
 	Value bool
@@ -50,6 +58,17 @@ type Boolean struct {
 
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
+func (b *Boolean) HashKey() HashKey {
+	var value uint64
+
+	if b.Value {
+		value = 1
+	} else {
+		value = 0
+	}
+
+	return HashKey{Type: b.Type(), Value: value}
+}
 
 type Null struct{}
 
@@ -101,6 +120,11 @@ type String struct {
 
 func (s *String) Type() ObjectType { return STRING_OBJ }
 func (s *String) Inspect() string  { return s.Value }
+func (s *String) HashKey() HashKey {
+	h := fnv.New64a()
+	h.Write([]byte(s.Value))
+	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
 
 type Builtin struct {
 	Fn BuiltInFunction
@@ -127,33 +151,6 @@ func (ao *Array) Inspect() string {
 	out.WriteString("]")
 
 	return out.String()
-}
-
-type HashKey struct {
-	Type  ObjectType
-	Value uint64
-}
-
-func (b *Boolean) HashKey() HashKey {
-	var value uint64
-
-	if b.Value {
-		value = 1
-	} else {
-		value = 0
-	}
-
-	return HashKey{Type: b.Type(), Value: value}
-}
-
-func (b *Integer) HashKey() HashKey {
-	return HashKey{Type: b.Type(), Value: uint64(b.Value)}
-}
-
-func (s *String) HashKey() HashKey {
-	h := fnv.New64a()
-	h.Write([]byte(s.Value))
-	return HashKey{Type: s.Type(), Value: h.Sum64()}
 }
 
 type HashPair struct {
@@ -197,7 +194,7 @@ type Closure struct {
 	Free []Object
 }
 
-func (c *Closure) Type()    ObjectType {return CLOSURE_OBJ}
+func (c *Closure) Type() ObjectType { return CLOSURE_OBJ }
 func (c *Closure) Inspect() string {
 	return fmt.Sprintf("Closure[%p]", c)
 }

@@ -18,12 +18,12 @@ func TestDefine(t *testing.T) {
 
 	a := global.Define("a")
 	if a != expected["a"] {
-		t.Errorf("Expected a=%+v, got=%+v", expected["a"], a)
+		t.Errorf("expected a=%+v, got=%+v", expected["a"], a)
 	}
 
 	b := global.Define("b")
 	if b != expected["b"] {
-		t.Errorf("Expected b=%+v, got=%+v", expected["b"], b)
+		t.Errorf("expected b=%+v, got=%+v", expected["b"], b)
 	}
 
 	firstLocal := NewEnclosedSymbolTable(global)
@@ -38,7 +38,7 @@ func TestDefine(t *testing.T) {
 		t.Errorf("expected d=%+v, got=%+v", expected["d"], d)
 	}
 
-	secondLocal := NewEnclosedSymbolTable(global)
+	secondLocal := NewEnclosedSymbolTable(firstLocal)
 
 	e := secondLocal.Define("e")
 	if e != expected["e"] {

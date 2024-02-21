@@ -17,7 +17,7 @@ func TestStringHashKey(t *testing.T) {
 	}
 
 	if hello1.HashKey() == diff1.HashKey() {
-		t.Errorf("string with different content have same hash keys")
+		t.Errorf("strings with different content have same hash keys")
 	}
 }
 

@@ -507,7 +507,7 @@ func isTruthy(obj object.Object) bool {
 }
 
 func (vm *VM) executeCall(numArgs int) error {
-	callee := vm.stack[vm.sp-1-int(numArgs)]
+	callee := vm.stack[vm.sp-1-numArgs]
 	switch callee := callee.(type) {
 	case *object.Closure:
 		return vm.callClosure(callee, numArgs)
