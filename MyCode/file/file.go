@@ -6,17 +6,11 @@ import (
 
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/compiler"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/lexer"
-	"github.com/Aditya-Chowdhary/Monkey-Interpreter/object"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/parser"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/vm"
 )
 
 func RunCode(fileCode string) {
-	symbolTable := compiler.NewSymbolTable()
-	for i, v := range object.Builtins {
-		symbolTable.DefineBuiltin(i, v.Name)
-	}
-
 	l := lexer.New(fileCode)
 	p := parser.New(l)
 

@@ -27,7 +27,7 @@ var input = `
 	}
 	}
 	};
-	fibonacci(60);
+	fibonacci(35);
 	`
 
 func main() {
