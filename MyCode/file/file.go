@@ -3,12 +3,24 @@ package file
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/compiler"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/lexer"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/parser"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/vm"
 )
+
+func ReadCode(filepath string) (string, error) {
+	fileContent, err := os.ReadFile(filepath)
+	if err != nil {
+		return "", fmt.Errorf("error: Invalid file name")
+	}
+	if !strings.HasSuffix(filepath, ".mky") {
+		return "", fmt.Errorf("error: Invalid file name")
+	}
+	return string(fileContent), nil
+}
 
 func RunCode(fileCode string) {
 	l := lexer.New(fileCode)

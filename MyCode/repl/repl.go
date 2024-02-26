@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os/user"
 
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/compiler"
 	"github.com/Aditya-Chowdhary/Monkey-Interpreter/lexer"
@@ -15,6 +16,13 @@ import (
 const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
+	user, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Hello %s! This is the Monkey Programming Language!\n", user.Username)
+	fmt.Printf("Feel free to type in commands!\n")
+
 	scanner := bufio.NewScanner(in)
 
 	constants := []object.Object{}
