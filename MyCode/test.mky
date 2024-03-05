@@ -28,6 +28,10 @@ let fibonacci = fn(x) {
     }
 };
 
+let arg = ["one", "hello", [1, 2, 3]]
+puts(len(arg))
+puts(len(arg, "byebye", "hi"))
+
 let map = fn(arr, f) {
     let iter = fn(arr, accumulated) {
         if (len(arr) == 0) {

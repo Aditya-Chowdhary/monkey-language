@@ -7,21 +7,30 @@ var Builtins = []struct {
 	Builtin *Builtin
 }{
 	{
-		// TODO if passed multiple arguments, return length of all values?
 		"len",
 		&Builtin{
 			Fn: func(args ...Object) Object {
-				if len(args) != 1 {
-					return newError("wrong number of arguments. got=%d, want=1", len(args))
+				if len(args) < 1 {
+					return newError("at least one argument required. got=%d", len(args))
 				}
 
-				switch arg := args[0].(type) {
-				case *Array:
-					return &Integer{Value: int64(len(arg.Elements))}
-				case *String:
-					return &Integer{Value: int64(len(arg.Value))}
-				default:
-					return newError("argument to `len` not supported, got %s", args[0].Type())
+				lengths := make([]Object, len(args))
+				for i, v := range args {
+
+					switch arg := v.(type) {
+					case *Array:
+						lengths[i] = &Integer{Value: int64(len(arg.Elements))}
+					case *String:
+						lengths[i] = &Integer{Value: int64(len(arg.Value))}
+					default:
+						return newError("argument to `len` not supported, got %s, position %d", v.Type(), i)
+					}
+				}
+
+				if len(lengths) == 1 {
+					return lengths[0]
+				} else {
+					return &Array{Elements: lengths}
 				}
 			},
 		},

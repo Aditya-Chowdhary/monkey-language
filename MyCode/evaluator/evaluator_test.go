@@ -332,13 +332,14 @@ func TestBuiltinFunctions(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
+		{`len()`, "at least one argument required. got=0"},
 		{`len("")`, 0},
 		{`len("four")`, 4},
 		{`len("hello world")`, 11},
-		{`len(1)`, "argument to `len` not supported, got INTEGER"},
-		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
-		{`len(1)`, "argument to `len` not supported, got INTEGER"},
-		{`len("one", "two")`, "wrong number of arguments. got=2, want=1"},
+		{`len(1)`, "argument to `len` not supported, got INTEGER, position 0"},
+		{`len("one", "two")`, []int{3, 3}},
+		{`len("one", [1, 2])`, []int{3, 2}},
+		{`len("one", [1, 2], 5)`, "argument to `len` not supported, got INTEGER, position 2"},
 		{`len([1, 2, 3])`, 3},
 		{`len([])`, 0},
 		{`puts("hello", "world!")`, nil},
@@ -486,8 +487,8 @@ func TestHashLiterals(t *testing.T) {
 		(&object.String{Value: "two"}).HashKey():   2,
 		(&object.String{Value: "three"}).HashKey(): 3,
 		(&object.Integer{Value: 4}).HashKey():      4,
-		TRUE.HashKey():   5,
-		FALSE.HashKey():  6,
+		TRUE.HashKey():                             5,
+		FALSE.HashKey():                            6,
 	}
 
 	if len(result.Pairs) != len(expected) {
@@ -573,7 +574,6 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 
 	return true
 }
-
 
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.Boolean)

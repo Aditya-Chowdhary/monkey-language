@@ -416,22 +416,24 @@ func TestCallingFunctionsWithWrongArguments(t *testing.T) {
 
 func TestBuiltinFunctions(t *testing.T) {
 	tests := []vmTestCase{
+		{`len()`, &object.Error{
+			Message: "at least one argument required. got=0",
+		}},
 		{`len("")`, 0},
 		{`len("four")`, 4},
 		{`len("hello world")`, 11},
 		{
 			`len(1)`,
 			&object.Error{
-				Message: "argument to `len` not supported, got INTEGER",
+				Message: "argument to `len` not supported, got INTEGER, position 0",
 			},
 		},
-		{`len("one", "two")`,
-			&object.Error{
-				Message: "wrong number of arguments. got=2, want=1",
-			},
-		},
+		{`len("one", "two")`, []int{3, 3}},
 		{`len([1, 2, 3])`, 3},
 		{`len([])`, 0},
+		{`len("one", [1, 2], 5)`, &object.Error {
+			Message:  "argument to `len` not supported, got INTEGER, position 2",
+		}},
 		{`puts("hello", "world!")`, Null},
 		{`first([1, 2, 3])`, 1},
 		{`first([])`, Null},
