@@ -33,6 +33,12 @@ var input = `
 	fibonacci(35);
 	`
 
+type benchResults struct {
+	engine   string
+	result   object.Object
+	duration time.Duration
+}
+
 func main() {
 	flag.Parse()
 
@@ -54,17 +60,29 @@ func main() {
 	} else if *engine == "eval" {
 		timeEval(program)
 	} else {
-		timeEval(program)
-		timeVM(program)
+		results := make(chan benchResults)
+		go func() {
+			fmt.Println("Running eval")
+			result := timeEval(program)
+			results <- result
+			}()
+			go func() {
+			fmt.Println("Running vm")
+			result := timeVM(program)
+			results <- result
+		}()
+
+		printResult(<-results)
+		printResult(<-results)
 	}
 }
 
-func timeVM(program *ast.Program) {
+func timeVM(program *ast.Program) benchResults {
 	comp := compiler.New()
 	err := comp.Compile(program)
 	if err != nil {
 		fmt.Printf("compiler error: %s", err)
-		return
+		return benchResults{}
 	}
 
 	machine := vm.New(comp.Bytecode())
@@ -74,27 +92,25 @@ func timeVM(program *ast.Program) {
 	err = machine.Run()
 	if err != nil {
 		fmt.Printf("vm error: %s", err)
-		return
+		return benchResults{}
 	}
 
 	duration := time.Since(start)
 	result := machine.LastPoppedStackElem()
-
-	printResult("vm", result, duration)
+	return benchResults{engine: "vm", result: result, duration: duration}
 }
 
-func timeEval(program *ast.Program) {
+func timeEval(program *ast.Program) benchResults {
 	env := object.NewEnvironment()
 	start := time.Now()
 	result := evaluator.Eval(program, env)
 	duration := time.Since(start)
-
-	printResult("eval", result, duration)
+	return benchResults{engine: "eval", result: result, duration: duration}
 }
 
-func printResult(engine string, result object.Object, duration time.Duration) {
+func printResult(result benchResults) {
 	fmt.Printf("--> engine=%s, result=%s, duration=%s\n",
-		engine,
-		result.Inspect(),
-		duration)
+		result.engine,
+		result.result.Inspect(),
+		result.duration)
 }
